@@ -44,6 +44,10 @@
       <artifactId>camel-timer</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-file</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
       <version>${log4j2-version}</version>
@@ -79,7 +83,7 @@
         <version>3.18.3</version>
         <configuration>
           <logClasspath>true</logClasspath>
-          <mainClass>dev.huggo.camelexample.MyApplication</mainClass>
+          <mainClass>dev.huggo.camelexample.Main</mainClass>
         </configuration>
       </plugin>
       <plugin>

@@ -1,4 +1,4 @@
-package dev.huggo.camelexample;
+package dev.huggo.camelexample.route;
 
 import org.apache.camel.builder.RouteBuilder;
 
