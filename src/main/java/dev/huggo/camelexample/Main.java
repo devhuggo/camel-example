@@ -1,26 +1,37 @@
 package dev.huggo.camelexample;
 
-import dev.huggo.camelexample.bean.ExampleFileFilter;
-import dev.huggo.camelexample.route.ExampleRoute;
+
+import dev.huggo.camelexample.route.ChoiceExampleRoute;
+import dev.huggo.camelexample.route.RecipentListExampleRoute;
+import jakarta.jms.ConnectionFactory;
 import org.apache.camel.CamelContext;
+import org.apache.camel.component.jms.JmsComponent;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.spi.PropertiesComponent;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+
 
 public class Main {
     public static void main(String[] args) {
         try (CamelContext camelContext = new DefaultCamelContext()) {
-            camelContext.addRoutes(new ExampleRoute());
-            PropertiesComponent properties = camelContext.getPropertiesComponent();
-            properties.setLocation("classpath:my-camel.properties");
+//            camelContext.addRoutes(new ChoiceExampleRoute());
+            camelContext.addRoutes(new RecipentListExampleRoute());
+            JmsComponent jms =  camelContext.getComponent("jms", JmsComponent.class);
+            jms.setConnectionFactory(createConnectionFactory());
 
-            camelContext.getRegistry().bind("my-file-filter", new ExampleFileFilter());
 
             camelContext.start();
-            Thread.sleep(2000);
-            camelContext.stop();
+            Thread.sleep(200000);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
+    }
+
+    private static ConnectionFactory createConnectionFactory() {
+            JmsConnectionFactory jmsConnectionFactory = new JmsConnectionFactory("amqp://localhost:61616");
+            jmsConnectionFactory.setUsername("artemis");
+            jmsConnectionFactory.setPassword("artemis");
+            return jmsConnectionFactory;
     }
 }
