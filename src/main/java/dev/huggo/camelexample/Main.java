@@ -1,10 +1,7 @@
 package dev.huggo.camelexample;
 
 
-import dev.huggo.camelexample.bean.MyExampleMapper;
-import dev.huggo.camelexample.route.BeanExampleRoute;
-import dev.huggo.camelexample.route.ProcessorExampleRoute;
-import dev.huggo.camelexample.route.TransformExampleRoute;
+import dev.huggo.camelexample.route.ErrorHandlerExampleRoute;
 import org.apache.camel.CamelContext;
 import org.apache.camel.impl.DefaultCamelContext;
 
@@ -13,11 +10,7 @@ import org.apache.camel.impl.DefaultCamelContext;
 public class Main {
     public static void main(String[] args) {
         try (CamelContext camelContext = new DefaultCamelContext()) {
-            camelContext.addRoutes(new ProcessorExampleRoute());
-            camelContext.addRoutes(new BeanExampleRoute());
-            camelContext.addRoutes(new TransformExampleRoute());
-
-            camelContext.getRegistry().bind("my-transformer", new MyExampleMapper());
+            camelContext.addRoutes(new ErrorHandlerExampleRoute());
 
             camelContext.start();
             Thread.sleep(2000);
