@@ -1,19 +1,23 @@
 package dev.huggo.camelexample.route;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.camel.builder.RouteBuilder;
 
 public class ProcessorExampleRoute extends RouteBuilder {
     @Override
     public void configure() throws Exception {
-        from("file:src/main/resources/files?fileName=processor-example.txt&noop=true")
+        from("file:src/main/resources/files?fileName=processor-example.json&noop=true")
+                .unmarshal().json()
                 .log("Body: ${body}, Headers: ${headers}")
                 .process(exchange -> {
-                    String body = exchange.getMessage().getBody(String.class);
-                    String transformedBody = body.toUpperCase();
-                    
-                    exchange.getMessage().setBody(transformedBody);
+                    ObjectNode body = exchange.getMessage().getBody(ObjectNode.class);
+
+                    body.put("newField", "newValue");
+
+                    exchange.getMessage().setBody(body);
 
                 })
-                .to("file:src/main/resources/files/output?fileName=processor-example.txt");
+                .marshal().json()
+                .to("file:src/main/resources/files/output?fileName=processor-example.json");
     }
 }
