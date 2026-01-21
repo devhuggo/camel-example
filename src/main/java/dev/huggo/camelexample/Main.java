@@ -4,6 +4,7 @@ package dev.huggo.camelexample;
 import dev.huggo.camelexample.bean.MyExampleMapper;
 import dev.huggo.camelexample.route.BeanExampleRoute;
 import dev.huggo.camelexample.route.ProcessorExampleRoute;
+import dev.huggo.camelexample.route.TransformExampleRoute;
 import org.apache.camel.CamelContext;
 import org.apache.camel.impl.DefaultCamelContext;
 
@@ -14,6 +15,7 @@ public class Main {
         try (CamelContext camelContext = new DefaultCamelContext()) {
             camelContext.addRoutes(new ProcessorExampleRoute());
             camelContext.addRoutes(new BeanExampleRoute());
+            camelContext.addRoutes(new TransformExampleRoute());
 
             camelContext.getRegistry().bind("my-transformer", new MyExampleMapper());
 
