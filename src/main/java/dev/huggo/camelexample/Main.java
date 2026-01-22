@@ -1,24 +1,14 @@
 package dev.huggo.camelexample;
 
 
-import dev.huggo.camelexample.route.ExampleRoute;
-import org.apache.camel.CamelContext;
-import org.apache.camel.impl.DefaultCamelContext;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
-
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        try (CamelContext camelContext = new DefaultCamelContext()) {
-
-            camelContext.addRoutes(new ExampleRoute());
-
-            camelContext.start();
-            Thread.sleep(2000);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
+        SpringApplication.run(Main.class, args);
     }
 
 }

@@ -1,62 +1,67 @@
 package dev.huggo.camelexample.route;
 
+import dev.huggo.camelexample.bean.ExampleMessageTransformer;
 import org.apache.camel.CamelContext;
+import org.apache.camel.EndpointInject;
+import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.impl.DefaultCamelContext;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
-class ExampleRouteTest {
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-    private static CamelContext camelContext;
+@CamelSpringBootTest
+@SpringBootTest
+public class ExampleRouteTest {
 
-    private static final String mockExampleRouteToFileOutput = "mock:exampleRouteToFileOutput";
-    private static final String directExampleRouteTest = "direct:exampleRouteTest";
+    @Autowired
+    private CamelContext camelContext;
 
-    @BeforeAll
-    static void setup() throws Exception {
-        camelContext = new DefaultCamelContext();
-        camelContext.addRoutes(new ExampleRoute());
+    @MockBean
+    private ExampleMessageTransformer transformerMock;
 
+    private final String directTestEndpoint = "direct:example-route-test";
+
+    @EndpointInject("mock:example-route-test")
+    private MockEndpoint mock;
+
+    @Produce(directTestEndpoint)
+    private ProducerTemplate template;
+
+    @BeforeEach
+    public void replaceEndpoints() throws Exception {
         AdviceWith.adviceWith(
                 camelContext,
                 ExampleRoute.ROUTE_ID,
                 route -> route
-                        .interceptSendToEndpoint("file:src/main/resources/files/output")
+                        .interceptSendToEndpoint("jms:{{example.queue.output.name}}")
                         .skipSendToOriginalEndpoint()
-                        .to(mockExampleRouteToFileOutput)
+                        .to(mock)
         );
-
         AdviceWith.adviceWith(
                 camelContext,
                 ExampleRoute.ROUTE_ID,
-                route -> route
-                        .replaceFromWith(directExampleRouteTest)
+                route -> route.replaceFromWith(directTestEndpoint)
         );
-
-        camelContext.start();
-    }
-
-    @AfterAll
-    static void teardown() throws Exception {
-        camelContext.stop();
     }
 
     @Test
     void testExampleRoute() throws Exception {
-        String testBody = "Bye World";
-        MockEndpoint toFileOutput = camelContext.getEndpoint("mock:exampleRouteToFileOutput", MockEndpoint.class);
+        String testBody = "test-body";
+        String testHeader = "test-header";
+        mock.expectedMessageCount(1);
 
-        toFileOutput.expectedMessageCount(1);
-        toFileOutput.message(0).body().isEqualTo(testBody.toUpperCase());
+        template.sendBodyAndHeader(testBody, "example-header", testHeader);
 
-        ProducerTemplate producer = camelContext.createProducerTemplate();
-        producer.sendBody(directExampleRouteTest, testBody);
-
-        toFileOutput.assertIsSatisfied();
+        verify(transformerMock, times(1)).transform(any());
+        mock.assertIsSatisfied();
     }
-
 }

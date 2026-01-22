@@ -1,20 +1,21 @@
 package dev.huggo.camelexample.route;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class ExampleRoute extends RouteBuilder {
 
     public static final String ROUTE_ID = "exampleRoute";
 
     @Override
     public void configure() throws Exception {
-        from("file:src/main/resources/files?noop=true")
+        from("artemis:{{example.queue.input.name}}?connectionFactory:{{example.queue.connection.factory}}")
                 .routeId(ROUTE_ID)
-                .process(exchange -> {
-                    exchange.getMessage().setBody(
-                            exchange.getIn().getBody(String.class).toUpperCase());
-                })
-                .to("file:src/main/resources/files/output");
+                .log("Received request ${body}")
+                .bean("exampleMessageTransformer")
+                .to("artemis:{{example.queue.output.name}}");
 
     }
 }
